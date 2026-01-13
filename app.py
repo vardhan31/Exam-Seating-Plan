@@ -145,7 +145,7 @@ st.set_page_config(page_title="Seating Arrangement", layout="wide")
 col1, col2, col3 = st.columns([1, 1, 1])
 with col2:
     logo = PILImage.open(LOGO_FILE)
-    logo = logo.resize((800, 150))
+    logo = logo.resize((750, 150))
     st.image(logo)
 
 st.title("🪑 Exam Seating Arrangement")
@@ -184,7 +184,6 @@ if "queues" not in st.session_state:
 
 seat_type = st.radio("Seating Type", ["Only one section", "Different sections"])
 
-# -------- ONLY ONE SECTION --------
 if seat_type == "Only one section":
     sec = st.selectbox("Select Section", sheets)
     q = st.session_state.queues[sec]
@@ -200,49 +199,6 @@ if seat_type == "Only one section":
         st.table(grid)
         pdf_file = generate_pdf(grid, room_no, exam_name, exam_date_str, exam_time_range)
         st.download_button("📄 Download PDF", pdf_file, file_name="Seating.pdf")
-
-# -------- DIFFERENT SECTIONS (ADDED FIX) --------
-elif seat_type == "Different sections":
-
-    if st.button("Generate Seating"):
-        grid = [["" for _ in range(cols)] for _ in range(rows)]
-
-        section_names = list(st.session_state.queues.keys())
-        section_queues = [st.session_state.queues[s] for s in section_names]
-
-        sec_index = 0
-
-        for c in range(0, cols, 2):
-            for r in range(rows):
-                attempts = 0
-                while attempts < len(section_queues):
-                    q = section_queues[sec_index]
-                    sec = section_names[sec_index]
-
-                    if q:
-                        roll, sub = q.popleft()
-                        grid[r][c] = f"{sec}\n{roll}\n{sub}"
-                        sec_index = (sec_index + 1) % len(section_queues)
-                        break
-                    else:
-                        sec_index = (sec_index + 1) % len(section_queues)
-                        attempts += 1
-
-        st.table(grid)
-
-        pdf_file = generate_pdf(
-            grid,
-            room_no,
-            exam_name,
-            exam_date_str,
-            exam_time_range
-        )
-
-        st.download_button(
-            "📄 Download PDF",
-            pdf_file,
-            file_name="Seating.pdf"
-        )
 
 # ---------------- STREAMLIT FOOTER ----------------
 st.markdown(
